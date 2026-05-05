@@ -1,11 +1,15 @@
-from rest_framework import viewsets
 from rest_framework import serializers
-from ..serializers.product_serializers import ProductSerializers,ModifierSerializers
-from apps.users.models import TemporaryUser, Card, CardItem, Order, OrderItem, User
-from apps.users.models import Product
+from apps.users.models import User
+from rest_framework.exceptions import ValidationError
 
-class UserSerializer(serializers.ModelSerializer):
+
+class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'full_name']
-        read_only_fields = ['id']
+        fields = ['email', 'first_name', 'last_name', 'password']
+
+    def validate_first_name(self, obj):
+        if len(obj) < 2:
+            raise ValidationError("First name must be length more 5")
+        return obj
+    
