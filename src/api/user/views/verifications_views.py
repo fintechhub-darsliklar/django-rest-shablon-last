@@ -1,11 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.users.models import User, UserOTPVerifications
-from api.user.serializers import user_serializers
-from api.send_mail_sms import send_otp_email
+from apps.users.models import UserOTPVerifications, UserOTPIDVerifications
 from django.utils import timezone
 from datetime import timedelta
+from django.shortcuts import redirect
 
 
 class VerificationsOTPView(APIView):
@@ -57,3 +56,23 @@ class VerificationsOTPView(APIView):
             return Response({
                 "error": "Verifications code expired!"
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+    
+class VerificationsOTPLinkView(APIView):
+
+    def get(self, request, link_id):
+        print(link_id)
+        try:
+            otp_link = UserOTPIDVerifications.objects.get(code=link_id)
+            if otp_link.is_code_expired():
+                otp_link.user.is_active = True
+                otp_link.user.save()
+                return redirect("https://google.com")
+            return Response({
+                "error": "Verifications code expired! please resend link"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({
+                "error": "Verifications code expired!"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        

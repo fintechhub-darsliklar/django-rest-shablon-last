@@ -108,4 +108,19 @@ class UserOTPVerifications(models.Model):
         return False
     
 
+class UserOTPIDVerifications(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.UUIDField(default=uuid.uuid4)
+    expired_at = models.DateTimeField()
+    attapts = models.IntegerField(default=0)
+    error_expired_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"{self.user} | {self.code}"
+    
+    def is_code_expired(self):
+        if self.expired_at >= timezone.now():
+            return self.expired_at.timestamp()
+        return False
+    
