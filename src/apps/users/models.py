@@ -87,6 +87,7 @@ class UserOTPVerifications(models.Model):
     code = models.CharField(max_length=6)
     expired_at = models.DateTimeField()
     attapts = models.IntegerField(default=0)
+    resend_attapts = models.IntegerField(default=0)
     error_expired_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 

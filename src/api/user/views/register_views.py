@@ -18,7 +18,7 @@ class RegisterViews(APIView):
             error_expired_at=timezone.now()
         )
         code = otp.generate_code()
-        send_otp_email(email, code, "link")
+        send_otp_email(email, code, "otp")
         
     
     def send_otp_code_link(self, user, email):

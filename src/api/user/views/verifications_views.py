@@ -61,7 +61,6 @@ class VerificationsOTPView(APIView):
 class VerificationsOTPLinkView(APIView):
 
     def get(self, request, link_id):
-        print(link_id)
         try:
             otp_link = UserOTPIDVerifications.objects.get(code=link_id)
             if otp_link.is_code_expired():
@@ -75,4 +74,5 @@ class VerificationsOTPLinkView(APIView):
             return Response({
                 "error": "Verifications code expired!"
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+    
+
