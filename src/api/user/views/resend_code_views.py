@@ -10,15 +10,9 @@ from api.send_mail_sms import send_otp_email
     
 class ResendVerificationsOTPView(APIView):
 
-    def send_otp_code(self, user, email):
-        otp = UserOTPVerifications.objects.create(
-            user=user,
-            code="",
-            expired_at=timezone.now(),
-            error_expired_at=timezone.now()
-        )
-        code = otp.generate_code()
-        send_otp_email(email, code, "otp")
+    def send_otp_code(self, otp_data):
+        code = otp_data.generate_code()
+        send_otp_email(otp_data.user.email, code, "otp")
 
     def post(self, request, otp_type):
         email = request.data.get("email")
@@ -32,21 +26,19 @@ class ResendVerificationsOTPView(APIView):
             return Response({
                 "error": "error from sending resend code"
             }, status=status.HTTP_400_BAD_REQUEST)
-        print(user)
         otp_data = UserOTPVerifications.objects.filter(user=user).last()
-        print(otp_data)
         now = timezone.now()
         if not otp_data:
             return Response({
                 "error": "error from sending resend code"
             }, status=status.HTTP_400_BAD_REQUEST)
-        
+
         if otp_data.is_code_expired():
             return Response({
                 "error": f"you can resend mail code after: {otp_data.expired_at}"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        if otp_data.resend_attapts > 3:
+        if otp_data.resend_attapts >= 3:
             otp_data.error_expired_at = now + timedelta(days=1)
             otp_data.resend_attapts = 0
             otp_data.attapts = 0
@@ -54,7 +46,6 @@ class ResendVerificationsOTPView(APIView):
             return Response({
                 "error": f"you can resend mail code after: {otp_data.error_expired_at}"
             }, status=status.HTTP_400_BAD_REQUEST)
-
 
         if now < otp_data.error_expired_at:
             return Response({
@@ -67,8 +58,7 @@ class ResendVerificationsOTPView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
         otp_data.resend_attapts += 1
-
-        self.send_otp_code(otp_data.user, otp_data.user.email)
+        self.send_otp_code(otp_data)
 
         return Response({
             "message": "Verifications code sent to your email"

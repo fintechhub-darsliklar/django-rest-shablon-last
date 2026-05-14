@@ -18,7 +18,7 @@ class VerificationsOTPView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         now = timezone.now()
         try:
-            otp = UserOTPVerifications.objects.get(user__email=email)
+            otp = UserOTPVerifications.objects.get(user__email=email, for_forget_password=False)
             if otp.error_expired_at > now:
                 return Response({
                     "error": f"Your account blocked until {otp.error_expired_at}"
@@ -26,7 +26,7 @@ class VerificationsOTPView(APIView):
             if code != otp.code:
                 otp.attapts += 1
                 if otp.attapts > 6:
-                    otp.expired_at = now
+                    otp.expired_at = now - timedelta(minutes=10)
                     otp.attapts = 0
                     otp.error_expired_at = now + timedelta(minutes=5)
                     otp.code = ""
@@ -43,7 +43,7 @@ class VerificationsOTPView(APIView):
                 return Response({
                     "error": f"sms code expired. please resend!"
                 }, status=status.HTTP_400_BAD_REQUEST)
-            otp.expired_at = now
+            otp.expired_at = now - timedelta(minutes=10)
             otp.user.is_active = True
             otp.user.save()
             otp.save()
@@ -75,4 +75,47 @@ class VerificationsOTPLinkView(APIView):
                 "error": "Verifications code expired!"
             }, status=status.HTTP_400_BAD_REQUEST)
     
+
+
+class VerificationsOTPForgetPasswrdView(APIView):
+
+    def post(self, request):
+        email = request.data.get("email")
+        code = request.data.get("code")
+        if not email or not code or len(code) != 6:
+            return Response({
+                "error": "Email and code required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        now = timezone.now()
+        otp_data = UserOTPVerifications.objects.filter(user__email=email, for_forget_password=True).last()
+        if otp_data:
+            if otp_data.error_expired_at > now:
+                return Response({
+                    "error": f"Your account blocked until {otp_data.error_expired_at}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            if otp_data.resend_attapts >= 3:
+                otp_data.error_expired_at = now + timedelta(days=1)
+                otp_data.resend_attapts = 0
+                otp_data.attapts = 0
+                otp_data.save()
+                return Response({
+                    "error": f"you can resend mail code after: {otp_data.error_expired_at}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if otp_data.is_code_expired():
+                return Response({
+                    "error": f"otp code expired!"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            if otp_data.code == code:
+                otp_data.for_forget_password_verified = True
+                otp_data.expired_at = now + timedelta(minutes=30)
+                otp_data.save()
+                return Response({
+                    "message": "You can add new passoword until 30 minutes"
+                }, status=status.HTTP_200_OK)
+        
+        return Response({
+            "error": "verifications code wrong!"
+        }, status=status.HTTP_400_BAD_REQUEST)
 
