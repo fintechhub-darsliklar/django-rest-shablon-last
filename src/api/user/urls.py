@@ -6,6 +6,7 @@ from api.user.views.verifications_views import VerificationsOTPView, Verificatio
 from api.user.views.resend_code_views import ResendVerificationsOTPView
 from api.user.views.forget_password_views import ForgetPasswordView, SetForgetPasswordView
 from api.user.views.change_password_views import ChangePasswordViews
+from api.user.views.change_email_views import ChangeEmailViews
 
 
 router = DefaultRouter()
@@ -21,6 +22,7 @@ urlpatterns = [
     path("auth/forget-password/set/", SetForgetPasswordView.as_view()),
     path("auth/forget-password/<str:otp_type>/", ForgetPasswordView.as_view()),
     path("auth/change-password/", ChangePasswordViews.as_view()),
+    path("auth/change-email/", ChangeEmailViews.as_view()),
 
     # path('', include(router.urls)),
     # path('restaurant/', RestaurantViewset.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
