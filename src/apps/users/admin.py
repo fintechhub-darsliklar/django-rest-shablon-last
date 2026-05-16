@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, UserOTPVerifications, UserOTPIDVerifications
+from .models import User, UserOTPVerifications, UserOTPIDVerifications,\
+    ChangePasswordLogs, ChangeEmailLogs
 
 class UserAdmin(BaseUserAdmin):
     list_display = ('email', 'full_name', 'is_active')
@@ -27,3 +28,5 @@ admin.site.register(User, UserAdmin)
 
 admin.site.register(UserOTPVerifications)
 admin.site.register(UserOTPIDVerifications)
+admin.site.register(ChangePasswordLogs)
+admin.site.register(ChangeEmailLogs)

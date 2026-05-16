@@ -127,3 +127,60 @@ class UserOTPIDVerifications(models.Model):
             return self.expired_at.timestamp()
         return False
     
+
+
+class ChangePasswordLogs(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    old_password = models.CharField(max_length=255)
+    new_password = models.CharField(max_length=255)
+    expired_at = models.DateTimeField()
+    attapts = models.IntegerField(default=0)
+    error_expired_at = models.DateTimeField()
+    is_changed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} | {self.attapts}"
+    
+    def is_expired(self):
+        if self.expired_at >= timezone.now():
+            return self.expired_at
+        return False
+    
+    def is_blocked(self):
+        if self.error_expired_at >= timezone.now():
+            return self.error_expired_at
+        return False
+    
+
+
+class ChangeEmailLogs(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    expired_at = models.DateTimeField()
+    attapts = models.IntegerField(default=0)
+    error_expired_at = models.DateTimeField()
+    is_changed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} | {self.attapts}"
+    
+    def is_expired(self):
+        if self.expired_at >= timezone.now():
+            return self.expired_at
+        return False
+
+    def generate_code(self):
+        otp = random.randint(100000, 999999)
+        now = timezone.now()
+        next_time = now + timedelta(minutes=3)
+        self.expired_at = next_time
+        self.code = otp
+        self.save()
+        return otp
+
+    def is_blocked(self):
+        if self.error_expired_at >= timezone.now():
+            return self.error_expired_at
+        return False
