@@ -128,7 +128,6 @@ class UserOTPIDVerifications(models.Model):
         return False
     
 
-
 class ChangePasswordLogs(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     old_password = models.CharField(max_length=255)
@@ -153,17 +152,17 @@ class ChangePasswordLogs(models.Model):
         return False
     
 
-
 class ChangeEmailLogs(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(max_length=6)
+    old_email = models.CharField(max_length=150, default="")
     new_email = models.CharField(max_length=150, default="")
     expired_at = models.DateTimeField()
     attapts = models.IntegerField(default=0)
+    resend_attapts = models.IntegerField(default=0)
     error_expired_at = models.DateTimeField()
     is_changed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
 
     def __str__(self):
         return f"{self.user} | {self.attapts}"

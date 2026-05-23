@@ -1,10 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.users.models import UserOTPVerifications, UserOTPIDVerifications
+from apps.users.models import UserOTPVerifications, UserOTPIDVerifications, ChangeEmailLogs
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import redirect
+from rest_framework.permissions import IsAuthenticated
 
 
 class VerificationsOTPView(APIView):
@@ -76,7 +77,6 @@ class VerificationsOTPLinkView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
     
 
-
 class VerificationsOTPForgetPasswrdView(APIView):
 
     def post(self, request):
@@ -119,3 +119,61 @@ class VerificationsOTPForgetPasswrdView(APIView):
             "error": "verifications code wrong!"
         }, status=status.HTTP_400_BAD_REQUEST)
 
+
+class VerificationsOTPForChangeEmailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        code = request.data.get("code")
+        if not code or len(code) != 6:
+            return Response({
+                "error": "code required"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        now = timezone.now()
+        change_email_obj = ChangeEmailLogs.objects.filter(user=request.user, is_changed=False).last()
+        if change_email_obj:
+            user_is_blocked = change_email_obj.is_blocked()
+            if user_is_blocked:
+                return Response({
+                    "error": f"your account blocked until {user_is_blocked}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            can_changed = change_email_obj.is_expired()
+            if not can_changed:
+                return Response({
+                    "error": "code expired please resend"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if code != change_email_obj.code:
+                change_email_obj.attapts += 1
+                if change_email_obj.attapts > 6:
+                    change_email_obj.expired_at = now - timedelta(minutes=10)
+                    change_email_obj.attapts = 0
+                    change_email_obj.error_expired_at = now + timedelta(hours=1)
+                    change_email_obj.code = ""
+                    change_email_obj.save()
+                    return Response({
+                        "error": f"Your account blocked until {change_email_obj.error_expired_at}"
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                change_email_obj.save()
+                return Response({
+                    "error": f"sms code wrong! attapts: {change_email_obj.attapts}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            change_email_obj.expired_at = now - timedelta(minutes=10)
+            change_email_obj.is_changed = True
+            change_email_obj.old_email = change_email_obj.user.email
+            change_email_obj.user.email = change_email_obj.new_email
+            change_email_obj.user.save()
+            change_email_obj.save()
+
+            return Response({
+                "error": "Your email changed successfully!"
+            }, status=status.HTTP_200_OK)
+
+        else:
+            return Response({
+                "error": "Verifications code expired!"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+    

@@ -2,8 +2,9 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 from api.user.views.login_views import LoginView
 from api.user.views.register_views import RegisterViews
-from api.user.views.verifications_views import VerificationsOTPView, VerificationsOTPLinkView, VerificationsOTPForgetPasswrdView
-from api.user.views.resend_code_views import ResendVerificationsOTPView
+from api.user.views.verifications_views import VerificationsOTPView, VerificationsOTPLinkView, \
+    VerificationsOTPForgetPasswrdView, VerificationsOTPForChangeEmailView
+from api.user.views.resend_code_views import ResendVerificationsOTPView, ResendVerificationsOTPForChangeEmailView
 from api.user.views.forget_password_views import ForgetPasswordView, SetForgetPasswordView
 from api.user.views.change_password_views import ChangePasswordViews
 from api.user.views.change_email_views import ChangeEmailViews
@@ -23,6 +24,8 @@ urlpatterns = [
     path("auth/forget-password/<str:otp_type>/", ForgetPasswordView.as_view()),
     path("auth/change-password/", ChangePasswordViews.as_view()),
     path("auth/change-email/", ChangeEmailViews.as_view()),
+    path("auth/change-email/verification/resend/<str:otp_type>/", ResendVerificationsOTPForChangeEmailView.as_view()),
+    path("auth/change-email/verification/", VerificationsOTPForChangeEmailView.as_view()),
 
     # path('', include(router.urls)),
     # path('restaurant/', RestaurantViewset.as_view({'get': 'list','post':'create'}), name='restaurant-detail'),
