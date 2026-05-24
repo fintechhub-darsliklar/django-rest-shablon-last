@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from apps.users.models import User, UserOTPVerifications, UserOTPIDVerifications
 from api.user.serializers import user_serializers
-from api.send_mail_sms import send_otp_email
+from project_src.src.api.auth.send_mail_sms import send_otp_email
 from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta

@@ -4,7 +4,7 @@ from rest_framework import status
 from apps.users.models import UserOTPVerifications, UserOTPIDVerifications, User
 from django.utils import timezone
 from datetime import timedelta
-from api.send_mail_sms import send_otp_email
+from project_src.src.api.auth.send_mail_sms import send_otp_email
 
 
 

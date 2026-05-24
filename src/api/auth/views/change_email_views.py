@@ -6,7 +6,7 @@ from apps.users.models import ChangeEmailLogs
 from django.utils import timezone
 from datetime import timedelta
 from apps.users.models import User
-from api.send_mail_sms import send_otp_email
+from project_src.src.api.auth.send_mail_sms import send_otp_email
 import re
 
 
