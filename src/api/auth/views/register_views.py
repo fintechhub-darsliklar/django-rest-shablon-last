@@ -2,8 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from apps.users.models import User, UserOTPVerifications, UserOTPIDVerifications
-from api.user.serializers import user_serializers
-from project_src.src.api.auth.send_mail_sms import send_otp_email
+from api.auth.serializers import user_serializers
+from api.auth.send_mail_sms import send_otp_email
+# from api.auth.tasks import send_otp_email_task # celery bilan yuborish kerak bo'lsa
 from django.utils import timezone
 from django.conf import settings
 from datetime import timedelta
@@ -46,7 +47,7 @@ class RegisterViews(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
     
         try:
-            User.objects.get(email=email)
+            User.objects.get(email=email).delete()
             return Response({
                 "error": "Email already exists"
             }, status=status.HTTP_400_BAD_REQUEST)

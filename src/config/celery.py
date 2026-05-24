@@ -1,22 +1,16 @@
-# from __future__ import absolute_import, unicode_literals
-# import os
+# config/celery.py (yoki src/celery.py)
+import os
+from celery import Celery
 
-# from celery import Celery
-# from django.conf import settings
+# Django sozlamalari faylini Celery-ga tanishtiramiz
+# 'config.settings' qismini loyihangizga qarab o'zgartiring (masalan: 'src.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.base')
 
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+# Celery ilovasini yaratamiz (loyiha nomini xohlagancha yozish mumkin)
+app = Celery('ziyodev_django_project')
 
-# app = Celery(settings.CELERY_APP_NAME, broker=settings.CELERY_BROKER_URL)
-#
-# # Load task modules from all registered Django app configs.
-# app.config_from_object('django.conf:settings', namespace='CELERY')
-#
-# # Load task modules from all registered Django app configs.
-# app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
-#
-#
-# @app.task(bind=True)
-# def debug_task(self):
-#     print('Request: {0!r}'.format(self.request))
-#
-#
+# Barcha Celery sozlamalarini Django settings.py ichidan 'CELERY_' prefiksi orqali o'qiydi
+app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Loyihadagi barcha tasks.py fayllarini avtomatik qidirib topadi
+app.autodiscover_tasks()

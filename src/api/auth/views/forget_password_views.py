@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from apps.users.models import UserOTPVerifications, UserOTPIDVerifications, User
+from apps.users.models import UserOTPVerifications
 from django.utils import timezone
 from datetime import timedelta
-from project_src.src.api.auth.send_mail_sms import send_otp_email
+from api.auth.send_mail_sms import send_otp_email
+# from api.auth.tasks import send_otp_email_task # celery bilan yuborish kerak bo'lsa
+
 
 
 

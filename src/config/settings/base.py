@@ -170,17 +170,20 @@ EMAIL_HOST_PASSWORD = env("EMAIL_PASSWORD") # Generate in Gmail
 
 
 BASE_URL_LINK = env("BASE_URL_LINK")
-# CELERY
-# CELERY_APP_NAME = ''
-#
-# CELERY_BROKER_URL = 'redis://redis_br:6379/0'
-# CELERY_RESULT_BACKEND = 'redis://redis_br:6379/0'
-#
-# CELERY_ACCEPT_CONTENT = ['application/json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_IGNORE_RESULT = False
-# CELERYD_TASK_SOFT_TIME_LIMIT = 60
-#
-# CELERY_ENABLED = True
+
+
+# CELERY SOZLAMALARI
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'  # yoki Docker bo'lsa: redis://redis_br:6379/0
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+# Agar SQLite bazadan broker sifatida foydalanmoqchi bo'lsangiz:
+# CELERY_BROKER_URL = 'sqla+sqlite:///db.sqlite3'
+# CELERY_RESULT_BACKEND = 'db+sqlite:///db.sqlite3'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_IGNORE_RESULT = False
+CELERY_TASK_SOFT_TIME_LIMIT = 60
 
